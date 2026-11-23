@@ -5,12 +5,17 @@
 
 #define SHARED_KEY      "cleftresecurisee"
 #define SALTED_KEY_SIZE 16
+#define NONCE_SIZE 8
 
 uint8_t salted_key[SALTED_KEY_SIZE];
+uint8_t nonce[NONCE_SIZE];
 
 static uint8_t salted_key_generation(uint8_t *data , uint8_t dlen){
+    hkdf_ctx ctx;
+    hkdf_status wd = hkdf_ctx_init(&ctx, nonce, NONCE_SIZE, "secu mat",  sizeof("secu mat"));
+    hkdf_ctx_derive(&ctx, const uint8_t *ikm, size_t ikm_len, uint8_t *okm, size_t okm_len);
     
-    return 0;
+    return wd;
 }
 
 static uint8_t decipher(uint8_t *data , uint8_t dlen){
@@ -28,6 +33,7 @@ int main(void)
 {
     FILE *fptr;
     char fileContents[48]; // 104 bytes for actual PUF
+    hkdf_ctx ctx;
 
     fptr = fopen("ciphertext.txt", "r");
     fgets(fileContents, 48, fptr);
