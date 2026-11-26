@@ -5,13 +5,13 @@
 
 #define CTR 1
 #define SALTED_KEY_SIZE 16
-#define NONCE_SIZE 12
+#define NONCE_SIZE 16
 #define IV_SIZE 16
 
 #define CT_FILE_SIZE 64
 #define CT_SIZE 16
 
-uint8_t NONCE[12]; /* nonce prédéfini = salt */
+uint8_t NONCE[NONCE_SIZE]; /* nonce prédéfini = salt */
 static const uint8_t INFO[] = "secu mat";
 static const uint8_t SHARED_KEY[] = "cleftresecurisee";
 
@@ -21,9 +21,9 @@ uint8_t okm[48];
 hkdf_ctx ctx;
 
 static uint8_t salted_key_generation(/*uint8_t *salt , uint8_t saltlen*/){
-    if (hkdf_ctx_init(&ctx, NONCE, sizeof(NONCE), INFO, sizeof(INFO)-1) != HKDF_OK ||
+    if (hkdf_ctx_init(&ctx, NONCE, NONCE_SIZE, INFO, sizeof(INFO)-1) != HKDF_OK ||
         hkdf_ctx_derive(&ctx, SHARED_KEY, sizeof(SHARED_KEY)-1, okm, sizeof(okm)) != HKDF_OK) {
-        fprintf(stderr, "dérivation échouée\n"); 
+        fprintf(stderr, "KC01 : KDF failed\n"); 
         return 1;
     }
 
@@ -56,7 +56,7 @@ int main(void)
     //char saltK[16];
     uint8_t PTCT[CT_SIZE];
     hkdf_ctx ctx;
-
+    
     (void)ctx;
 
     fptr = fopen("PT_transLine.bin", "rb");
@@ -70,7 +70,9 @@ int main(void)
     }
     printf("\n");
 
-    salted_key_generation();
+    if(salted_key_generation() == 1){
+        return 1;
+    }
 
     fptr = fopen("AES_cheat.bin", "rb");
     fread(fileContents, sizeof(uint8_t), CT_FILE_SIZE, fptr);
