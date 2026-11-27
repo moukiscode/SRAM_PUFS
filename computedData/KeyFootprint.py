@@ -48,6 +48,6 @@ class KeyFootprint():
                         keyData = 1
                     elif(float(col) == 0.0):
                         keyData = 0
-                computedKey[k] = keyData
+                computedKey.append(keyData)
                 k = k + 1
         return computedKey

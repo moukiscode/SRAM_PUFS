@@ -19,6 +19,7 @@ class SRAManalyser:
         self.FILES = []
         self.stackedRawData = -1
         self.stackedData = -1
+        self.MATRIX_SIZE = 64
     
     def addFile(self, newFile):
         ### Adds new file(s) to the dataset
@@ -41,7 +42,7 @@ class SRAManalyser:
             status = 0
         return status
 
-    def stackedRawData(self):
+    def stackRawData(self):
         ### Stacks and return the raw SRAM data
         #
         #
@@ -61,25 +62,23 @@ class SRAManalyser:
             print("Stacked raw data computing")
             print(f"Using {self.FILES}")
 
-            MATRIX_SIZE = 64
-
-            self.stackedData = []
-            for k in range(MATRIX_SIZE*MATRIX_SIZE):
-                self.stackedData.append(-1)
+            self.stackedRawData = []
+            for k in range(self.MATRIX_SIZE*self.MATRIX_SIZE):
+                self.stackedRawData.append(-1)
 
             for f in self.FILES:
                 data = csv.reader(open(f, "r"))
                 k = 0
                 for row in data:
                     for col in row:
-                        if (self.stackedData[k] == -1):
-                            self.stackedData[k] = float(col)
-                        else:None
-                            self.stackedData[k] = self.stackedData[k] + float(col)
+                        if (self.stackedRawData[k] == -1):
+                            self.stackedRawData[k] = float(col)
+                        else:
+                            self.stackedRawData[k] = self.stackedRawData[k] + float(col)
                         k = k + 1
         return self.stackedRawData
     
-    def computedData(self):
+    def computedData(self, givenRawData = -1):
         ### Computes the raw SRAM data and returns a matrix of non constant bit across all given datasets
         #
         #
@@ -91,19 +90,26 @@ class SRAManalyser:
         #           SA002       ; Raw data not stacked, cannot compute
         #           SAW01       ; Single dataset analysis
 
-        if(len(FILES) == 0):
+        if(givenRawData == -1):
+            givenRawData = self.stackedRawData
+
+        if(len(self.FILES) == 0):
             print("FAIL SA001 : Cannot compute data (no csv file given)")
             self.stackedData = -1
-        elif(self.stackedRawData == -1):
+        elif(givenRawData == -1):
             print("FAIL SA002 : No raw data to compute")
         else:
-            if(len(FILES) == 1):
+            if(len(self.FILES) == 1):
                 print("WARN SAW01 : RAM analysis on a single dataset")
 
-            for bit in range(len(self.stackedRawData)):
-                if(self.stackedRawData[bit] == 0):
+            self.stackedData = []
+            for k in range(self.MATRIX_SIZE*self.MATRIX_SIZE):
+                self.stackedData.append(-1)
+
+            for bit in range(len(givenRawData)):
+                if(givenRawData[bit] == 0):
                     self.stackedData[bit] = 0
-                elif (self.stackedRawData[bit] == FILES_QT):
+                elif (givenRawData[bit] == len(self.FILES)):
                     self.stackedData[bit] = 0
                 else:
                     self.stackedData[bit] = 1

@@ -28,32 +28,37 @@ class SRAMhandler():
         #
         # Raises :  None
 
-        analyse = analyser()
-        fprint = footprint()
+        if(len(fileList) == 0):
+            print("SH0001 : No file given. Cannot extract key")
+        else:
+            analyse = analyser.SRAManalyser()
+            fprint = footprint.KeyFootprint()
 
-        analyse.addFile(fileList)
-        analysedData = analyse.stackedData(analyse.stackedRawData())
+            analyse.addFile(fileList)
+            analysedData = analyse.computedData(analyse.stackRawData())
 
-        fprint.setCandidateBits(analysedData)
+            fprint.setCandidateBits(analysedData)
 
-        for file in fileList:
-            keys.append(computedKey(file))
+            for file in fileList:
+                self.keys.append(fprint.computeKey(file))
 
         return self.keys
 
-        def keyStoring(self):
-            ### Stores the keys ini their own csv file
-            #
-            #
-            # Args :    self    ;
-            #
-            # Returns : status  ; 0 if storage was successful, 1 otherwise
-            #
-            # Raises :  None
-            
-            keyNumber = 1
-            for key in self.keys:
-                with open(f"key_{keyNumber}.csv", "w") as keyFile:
-                    writer = csv.write(keyFile)
-                    write.writerows(key)
+    def keyStoring(self):
+        ### Stores the keys ini their own csv file
+        #
+        #
+        # Args :    self    ;
+        #
+        # Returns : status  ; 0 if storage was successful, 1 otherwise
+        #
+        # Raises :  None
+        
+        keyNumber = 1
+        for key in self.keys:
+            with open(f"key_{keyNumber}.csv", "w") as keyFile:
+                writer = csv.writer(keyFile)
+                writer.writerows([key])
+                print(f">>> Store : Wrote 'key_{keyNumber}.csv'")
+                keyNumber = keyNumber + 1
 
